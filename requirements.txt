@@ -4,3 +4,4 @@ torch
 torchaudio
 soundfile
 openai-whisper
+pypinyin
