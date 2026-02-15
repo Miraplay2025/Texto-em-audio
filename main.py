@@ -1,56 +1,50 @@
 import os
+import soundfile as sf  # Biblioteca para salvar o áudio corretamente
 from f5_tts.api import F5TTS
 import gradio as gr
 
-# Carregamento da IA (Versão 2026 estável)
-print("🚀 Iniciando Servidor de IA...")
-try:
-    # Inicialização sem parâmetros extras para evitar erro de TypeError
-    tts = F5TTS() 
-    print("✅ Modelo carregado com sucesso!")
-except Exception as e:
-    print(f"❌ Erro ao carregar o modelo: {str(e)}")
+# Carregamento da IA
+print("🚀 Iniciando Servidor de IA Miraplay...")
+tts = F5TTS()
 
 def processar_clonagem(texto, audio_ref):
     try:
-        print(f"📥 Recebido texto: {texto[:30]}...")
+        print(f"📥 Processando texto: {texto[:30]}...")
         
         if audio_ref is None:
-            print("⚠️ Aviso: Nenhum áudio de referência foi enviado.")
             return None
         
-        # Nome do arquivo de saída
-        caminho_saida = "voz_clonada_miraplay.wav"
+        # O NOME DO ARQUIVO FINAL
+        caminho_saida = "resultado_miraplay.wav"
         
-        print("🧠 IA processando a voz... Aguarde.")
-        
-        # CHAMADA CORRIGIDA: Usando 'output_path' em vez de 'output_file'
-        tts.infer(
+        # A nova forma de chamar: a IA devolve 3 coisas (o audio, a frequencia e os detalhes)
+        # Removi o 'output_path' daqui porque a nova versão não aceita mais
+        wav, sr, _ = tts.infer(
             gen_text=texto,
-            ref_file=audio_ref,
-            output_path=caminho_saida
+            ref_file=audio_ref
         )
         
-        print(f"✅ Sucesso! Áudio gerado em: {caminho_saida}")
+        # Agora nós salvamos o arquivo manualmente usando soundfile
+        sf.write(caminho_saida, wav, sr)
+        
+        print(f"✅ Áudio gerado com sucesso!")
         return caminho_saida
 
     except Exception as e:
-        print(f"💥 Erro durante a inferência: {str(e)}")
+        print(f"💥 Erro técnico: {str(e)}")
         return None
 
-# Interface Gradio (A moldura que aparece no seu site)
+# Interface do site
 demo = gr.Interface(
     fn=processar_clonagem,
     inputs=[
-        gr.Textbox(label="Texto para a IA falar", placeholder="Digite aqui o roteiro..."), 
-        gr.Audio(type="filepath", label="Voz de referência (Upload do áudio)")
+        gr.Textbox(label="Texto para a IA falar"), 
+        gr.Audio(type="filepath", label="Sua voz de referência")
     ],
-    outputs=gr.Audio(label="Áudio Final Clonado"),
-    title="MIRAPLAY 2026 - Sistema de Clonagem Neural",
-    description="Interface conectada ao Google Colab T4 GPU."
+    outputs=gr.Audio(label="Áudio Clonado"),
+    title="MIRAPLAY 2026",
+    description="Sistema profissional de clonagem de voz via API."
 )
 
-# Lança o servidor com link público
-# O link .gradio.live que aparecer no Colab deve ser colocado no seu index.html
 if __name__ == "__main__":
     demo.launch(share=True, debug=True)
