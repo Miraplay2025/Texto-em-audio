@@ -1,0 +1,7 @@
+f5-tts
+gradio
+torch
+torchaudio
+flask
+flask-socketio
+eventlet
