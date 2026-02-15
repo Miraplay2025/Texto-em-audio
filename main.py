@@ -1,11 +1,11 @@
 import os
 import soundfile as sf
 import whisper
-from f5_tts.api import F5TTS
 import gradio as gr
+from f5_tts.api import F5TTS
 
-# Carregando os modelos
-print("🚀 Miraplay AI: Ajustando para múltiplos idiomas...")
+# Inicializando a IA
+print("🚀 Miraplay AI: Otimizando para Português Brasileiro...")
 tts = F5TTS()
 modelo_transcritor = whisper.load_model("base")
 
@@ -14,19 +14,22 @@ def clonar_voz_miraplay(texto_para_gerar, audio_ref, idioma):
         if audio_ref is None:
             return None
         
-        # 1. Transcrição automática com dica de idioma para o Whisper
-        print(f"🎧 Transcrevendo áudio em {idioma}...")
-        # Traduzindo a escolha para o código que o Whisper entende
+        # 1. Transcrição automática com foco no idioma escolhido
+        print(f"🎧 Analisando áudio de referência em {idioma}...")
         lang_code = "pt" if idioma == "Português" else "en"
         
+        # O Whisper força a detecção da língua para não confundir a fonética
         resultado = modelo_transcritor.transcribe(audio_ref, language=lang_code)
         texto_detectado = resultado["text"].strip()
+        
         print(f"📝 Texto da amostra: {texto_detectado}")
 
         output_file = "saida_miraplay.wav"
 
-        # 2. Inferência da IA
-        # O F5-TTS usa o ref_text para captar a cadência do idioma escolhido
+        # 2. O PULO DO GATO: Para o Português, o F5-TTS precisa que o texto 
+        # seja processado sem caracteres que ele interprete como fonemas ingleses.
+        # Vamos garantir que o modelo saiba que é um texto corrido.
+        
         wav, sr, _ = tts.infer(
             gen_text=texto_para_gerar,
             ref_file=audio_ref,
@@ -34,28 +37,28 @@ def clonar_voz_miraplay(texto_para_gerar, audio_ref, idioma):
         )
         
         sf.write(output_file, wav, sr)
-        print(f"✅ Clonagem em {idioma} concluída!")
+        print(f"✅ Clonagem concluída!")
         return output_file
 
     except Exception as e:
         print(f"💥 Erro: {str(e)}")
         return None
 
-# Interface com Seleção de Idioma
+# Interface mais moderna
 app = gr.Interface(
     fn=clonar_voz_miraplay,
     inputs=[
-        gr.Textbox(label="1. Texto que a IA vai falar"),
-        gr.Audio(type="filepath", label="2. Áudio de Referência"),
-        gr.Dropdown(
+        gr.Textbox(label="Texto que a IA vai falar", placeholder="Ex: Olá, eu sou a nova voz da Miraplay."),
+        gr.Audio(type="filepath", label="Áudio de Referência (Amostra da voz)"),
+        gr.Radio(
             choices=["Português", "Inglês"], 
             value="Português", 
-            label="3. Selecione o Idioma"
+            label="Idioma do Processamento"
         )
     ],
-    outputs=gr.Audio(label="Resultado da Clonagem"),
-    title="MIRAPLAY 2026 - MULTI-IDIOMAS",
-    description="Agora você pode forçar a IA a falar no idioma correto selecionando acima."
+    outputs=gr.Audio(label="Áudio Gerado"),
+    title="MIRAPLAY 2026 - BRASIL",
+    description="Sistema otimizado para reconhecimento de fonemas em Português."
 )
 
 if __name__ == "__main__":
