@@ -1,50 +1,54 @@
 import os
 import soundfile as sf
+import whisper  # Nova biblioteca para transcrição automática
 from f5_tts.api import F5TTS
 import gradio as gr
 
-# Inicializando a Inteligência Artificial
-print("🚀 Miraplay AI: Carregando motores neurais...")
+# Carregando os modelos
+print("🚀 Miraplay AI: Carregando motores...")
 tts = F5TTS()
+modelo_transcritor = whisper.load_model("base") # Modelo leve e rápido
+print("✅ Inteligência de áudio pronta!")
 
-def clonar_voz_miraplay(texto, audio_ref):
+def clonar_voz_automatica(texto_para_gerar, audio_ref):
     try:
-        print(f"🎤 Nova solicitação de narração recebida...")
-        
         if audio_ref is None:
             return None
         
-        # Nome do arquivo temporário
-        output_file = "voz_final.wav"
-        
-        # A IA gera os dados do áudio (wav) e a frequência (sr)
+        print("🎧 Ouvindo e transcrevendo o áudio de referência...")
+        # O Whisper ouve o áudio e transforma em texto automaticamente
+        resultado_transcricao = modelo_transcritor.transcribe(audio_ref)
+        texto_detectado = resultado_transcricao["text"].strip()
+        print(f"📝 Texto detectado: {texto_detectado}")
+
+        output_file = "saida_miraplay.wav"
+
+        # Agora usamos o texto que o Whisper acabou de gerar
         wav, sr, _ = tts.infer(
-            gen_text=texto,
-            ref_file=audio_ref
+            gen_text=texto_para_gerar,
+            ref_file=audio_ref,
+            ref_text=texto_detectado
         )
         
-        # Salvando o arquivo de áudio no disco do Colab
         sf.write(output_file, wav, sr)
-        
-        print(f"✅ Áudio gerado com sucesso!")
+        print(f"✅ Clonagem concluída com sucesso!")
         return output_file
 
     except Exception as e:
-        print(f"💥 Erro na geração: {str(e)}")
+        print(f"💥 Erro no processo: {str(e)}")
         return None
 
-# Configuração da Interface (Visual que aparece no seu Iframe)
+# Interface simplificada (O usuário só precisa de 2 coisas agora!)
 app = gr.Interface(
-    fn=clonar_voz_miraplay,
+    fn=clonar_voz_automatica,
     inputs=[
-        gr.Textbox(label="Roteiro da Narração", placeholder="Escreva o que a voz deve dizer aqui..."),
-        gr.Audio(type="filepath", label="Voz de Referência (Amostra)")
+        gr.Textbox(label="1. O que a IA deve falar? (Seu Roteiro)"),
+        gr.Audio(type="filepath", label="2. Áudio de Referência (A IA vai transcrever sozinha)")
     ],
     outputs=gr.Audio(label="Resultado da Clonagem"),
-    title="MIRAPLAY 2026",
-    theme=gr.themes.Soft()
+    title="MIRAPLAY 2026 - IA AUTOMÁTICA",
+    description="Agora com transcrição automática via Whisper. Basta subir o áudio e o texto, a IA faz o resto."
 )
 
 if __name__ == "__main__":
-    # O share=True cria o link .gradio.live que você cola no InfinityFree
     app.launch(share=True, debug=True)
