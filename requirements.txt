@@ -3,3 +3,4 @@ gradio
 torch
 torchaudio
 soundfile
+openai-whisper
