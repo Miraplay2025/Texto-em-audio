@@ -1,4 +1,4 @@
-tts
+coqui-tts
 gradio
 torch
 torchaudio
