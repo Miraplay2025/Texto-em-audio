@@ -1,59 +1,44 @@
 import os
-import soundfile as sf
-import whisper
+import torch
+from TTS.api import TTS
 import gradio as gr
-from f5_tts.api import F5TTS # Usaremos a classe base que o sistema reconhece
 
-# Inicializando a IA forçando o modelo E2 (Mais multilingue)
-print("🚀 Miraplay AI: Ativando motor E2-TTS...")
-try:
-    # Mudamos o model_type para 'e2' aqui dentro
-    tts = F5TTS(model_type="e2") 
-    print("✅ Motor E2 carregado!")
-except:
-    # Caso a versão seja muito antiga e não aceite o parâmetro, ele usa o padrão
-    tts = F5TTS()
-    print("✅ Motor F5 carregado (Modo Compatibilidade)")
+# 🚀 Carregando o motor XTTS v2 (O melhor para Português)
+print("📥 Baixando motor de voz multilingue... Aguarde, isso pode levar 2 minutos.")
+device = "cuda" if torch.cuda.is_available() else "cpu"
+tts = TTS("tts_models/multilingual/multi-dataset/xtts_v2").to(device)
+print("✅ Motor XTTS v2 pronto para o Brasil!")
 
-modelo_transcritor = whisper.load_model("base")
-
-def clonar_voz_miraplay(texto_para_gerar, audio_ref):
+def clonar_voz_definitivo(texto, audio_ref):
     try:
         if audio_ref is None:
             return None
         
-        print(f"🎧 Analisando áudio com Whisper...")
-        # Forçamos o Whisper a entender que o áudio de referência é PT
-        resultado = modelo_transcritor.transcribe(audio_ref, language="pt")
-        texto_detectado = resultado["text"].strip()
-        print(f"📝 Texto detectado: {texto_detectado}")
-
-        output_file = "saida_miraplay.wav"
-
-        # Geração do áudio
-        wav, sr, _ = tts.infer(
-            gen_text=texto_para_gerar,
-            ref_file=audio_ref,
-            ref_text=texto_detectado
+        output_path = "resultado_br.wav"
+        
+        # O XTTS v2 tem o parâmetro 'language' nativo!
+        # Isso força a IA a usar a fonética do Brasil
+        tts.tts_to_file(
+            text=texto,
+            speaker_wav=audio_ref,
+            language="pt",
+            file_path=output_path
         )
         
-        sf.write(output_file, wav, sr)
-        print(f"✅ Clonagem concluída!")
-        return output_file
-
+        return output_path
     except Exception as e:
-        print(f"💥 Erro: {str(e)}")
+        print(f"💥 Erro: {e}")
         return None
 
+# Interface simples e poderosa
 app = gr.Interface(
-    fn=clonar_voz_miraplay,
+    fn=clonar_voz_definitivo,
     inputs=[
-        gr.Textbox(label="O que a IA deve falar (Use acentos: á, é, í, õ)"),
-        gr.Audio(type="filepath", label="Áudio de Referência (Voz da pessoa)")
+        gr.Textbox(label="O que a IA deve falar (Em Português)", placeholder="Olá, tudo bem?"),
+        gr.Audio(type="filepath", label="Voz de Referência (Suba seu áudio aqui)")
     ],
-    outputs=gr.Audio(label="Áudio Final"),
-    title="MIRAPLAY 2026 - MODO BRASIL",
-    description="Sistema atualizado para evitar sotaque estrangeiro."
+    outputs=gr.Audio(label="Voz Clonada em Português"),
+    title="MIRAPLAY 2026 - MODO BRASIL 🇧🇷"
 )
 
 if __name__ == "__main__":
