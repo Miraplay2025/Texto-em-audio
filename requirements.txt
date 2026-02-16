@@ -1,7 +1,5 @@
-f5-tts
+tts
 gradio
 torch
 torchaudio
 soundfile
-openai-whisper
-pypinyin
