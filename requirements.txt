@@ -3,3 +3,4 @@ gradio
 torch
 torchaudio
 soundfile
+numpy==1.24.3
