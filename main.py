@@ -3,43 +3,36 @@ import torch
 from TTS.api import TTS
 import gradio as gr
 
-# 🚀 Carregando o motor XTTS v2 (O melhor para Português)
-print("📥 Baixando motor de voz multilingue... Aguarde, isso pode levar 2 minutos.")
+# Configuração para GPU T4
 device = "cuda" if torch.cuda.is_available() else "cpu"
-tts = TTS("tts_models/multilingual/multi-dataset/xtts_v2").to(device)
-print("✅ Motor XTTS v2 pronto para o Brasil!")
 
-def clonar_voz_definitivo(texto, audio_ref):
+# Carregando modelo XTTS v2 (Multilingue)
+print("📥 Carregando motor XTTS v2...")
+tts = TTS("tts_models/multilingual/multi-dataset/xtts_v2").to(device)
+
+def clonar_voz(texto, audio_ref):
     try:
-        if audio_ref is None:
-            return None
+        if audio_ref is None: return None
+        output = "resultado.wav"
         
-        output_path = "resultado_br.wav"
-        
-        # O XTTS v2 tem o parâmetro 'language' nativo!
-        # Isso força a IA a usar a fonética do Brasil
+        # Forçando Português para evitar sotaque
         tts.tts_to_file(
             text=texto,
             speaker_wav=audio_ref,
             language="pt",
-            file_path=output_path
+            file_path=output
         )
-        
-        return output_path
+        return output
     except Exception as e:
-        print(f"💥 Erro: {e}")
+        print(f"Erro: {e}")
         return None
 
-# Interface simples e poderosa
 app = gr.Interface(
-    fn=clonar_voz_definitivo,
-    inputs=[
-        gr.Textbox(label="O que a IA deve falar (Em Português)", placeholder="Olá, tudo bem?"),
-        gr.Audio(type="filepath", label="Voz de Referência (Suba seu áudio aqui)")
-    ],
-    outputs=gr.Audio(label="Voz Clonada em Português"),
-    title="MIRAPLAY 2026 - MODO BRASIL 🇧🇷"
+    fn=clonar_voz,
+    inputs=[gr.Textbox(label="Texto (PT-BR)"), gr.Audio(type="filepath", label="Voz de Referência")],
+    outputs=gr.Audio(label="Áudio Clonado"),
+    title="MIRAPLAY 2026"
 )
 
 if __name__ == "__main__":
-    app.launch(share=True, debug=True)
+    app.launch(share=True)
