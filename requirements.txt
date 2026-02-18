@@ -1,4 +1,4 @@
-git+https://github.com/RVC-Boss/GPT-SoVITS.git
+coqui-tts
 gradio
-torch
-torchaudio
+soundfile
+transformers
