@@ -1,31 +1,44 @@
-# 🎙️ MIRAPLAY AI - Qwen Pure Intelligence
+# 🎙️ MIRAPLAY AI - Qwen Pure Intelligence (2026)
 
-Este sistema utiliza a arquitetura Qwen para clonagem de voz de ultra-fidelidade.
+Este sistema utiliza a arquitetura de inteligência artificial Qwen para clonagem de voz de ultra-fidelidade. O motor processa automaticamente ritmo, emoção e entonação, eliminando a necessidade de configurações manuais complexas.
 
 ## 🚀 Como Executar (Acesso Direto)
 
-Para facilitar, use o botão abaixo para abrir o ambiente com o código já inserido:
+Para utilizar o sistema com as 30 horas semanais de GPU gratuita, siga o link oficial abaixo:
 
-[![Abrir no Kaggle](https://img.shields.io/badge/Kaggle-Abrir_Projeto_Preenchido-blue?style=for-the-badge&logo=kaggle)](https://www.kaggle.com/kernels/welcome?src=navbar)
-
-> **⚠️ IMPORTANTE:** Ao abrir, clique no botão azul no topo direito escrito **"Copy and Edit"**. Isso vai carregar o código automaticamente na sua tela.
+[![Abrir no Kaggle](https://img.shields.io/badge/Kaggle-Abrir_Ambiente_de_IA-blue?style=for-the-badge&logo=kaggle)](https://www.kaggle.com/code/new)
 
 ---
 
-### 🛠️ Configurações Obrigatórias (No painel à direita)
+## 🛠️ Passo a Passo Obrigatório
 
-Mesmo abrindo o projeto, você deve conferir estas 3 coisas no menu **Settings**:
+Como você está em um ambiente profissional de IA, siga estas etapas para o sistema carregar corretamente:
 
-1.  **Accelerator:** Garanta que esteja em **GPU T4 x2**.
-2.  **Internet:** Deve estar em **Internet on**.
-3.  **Verificação:** Se a GPU não aparecer, verifique seu SMS em [kaggle.com/settings](https://www.kaggle.com/settings).
-
----
-
-### 🕒 Lembrete de Horas (GPU)
-* Você tem **30 horas grátis** por semana.
-* Sempre clique em **"Stop Session"** ao terminar para não gastar suas horas.
-* O saldo reseta toda **sexta-feira**.
+1.  **Login & Verificação:** Certifique-se de estar logado no Kaggle e com o celular verificado em [Settings](https://www.kaggle.com/settings) para liberar o uso da GPU.
+2.  **Configurar a Máquina (Lado Direito):**
+    * No menu **Settings**, em **Accelerator**, selecione **GPU T4 x2**.
+    * Verifique se a opção **Internet** está em **"Internet on"**.
+3.  **Executar o Código:**
+    * Crie uma nova célula de código (botão `+ Code`).
+    * Cole o código de inicialização (disponível abaixo).
+    * Clique no ícone de **Play** (Triângulo azul).
 
 ---
-**Desenvolvido por Miraplay 2026**
+
+## 📝 Código para Colar no Kaggle
+
+```python
+# 1. Preparação do ambiente
+import os
+%cd /kaggle/working/
+!rm -rf Texto-em-audio
+
+# 2. Conexão com o GitHub
+print("🔗 Conectando ao repositório Miraplay...")
+!git clone [https://github.com/Miraplay2025/Texto-em-audio.git](https://github.com/Miraplay2025/Texto-em-audio.git)
+%cd Texto-em-audio
+
+# 3. Instalação e Início
+print("📦 Instalando Motores Qwen (Aguarde 2-3 min)...")
+!pip install -r requirements.txt
+!python main.py
