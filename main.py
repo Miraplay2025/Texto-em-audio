@@ -17,20 +17,17 @@ try:
 except Exception as e:
     print(f"❌ Erro ao carregar motor: {e}")
 
-def clonar_voz_definitivo(texto, arquivo_referencia):
+def clonar_voz_definitivo(texto, audio_ref):
     try:
-        if arquivo_referencia is None:
+        if audio_ref is None:
             return None
         
-        caminho_original = arquivo_referencia.name
-        caminho_temporario = "temp_audio_ref.wav"
-        shutil.copy(caminho_original, caminho_temporario)
-        
+        # O audio_ref aqui já é o caminho do arquivo temporário
         output = "resultado_miraplay.wav"
         
         tts.tts_to_file(
             text=texto,
-            speaker_wav=caminho_temporario,
+            speaker_wav=audio_ref,
             language="pt",
             file_path=output
         )
@@ -40,29 +37,25 @@ def clonar_voz_definitivo(texto, arquivo_referencia):
         return None
 
 # --- DESIGN MODERNO ---
-meu_tema = gr.themes.Soft(
-    primary_hue="blue",
-    neutral_hue="slate",
-).set(
-    body_background_fill="*neutral_950",
-    block_background_fill="*neutral_900",
-    block_border_width="1px",
-    button_primary_background_fill="*primary_600",
-)
+meu_tema = gr.themes.Soft(primary_hue="blue", neutral_hue="slate")
 
-# --- CONSTRUÇÃO DA INTERFACE (Tema de volta aqui para evitar o TypeError) ---
 with gr.Blocks(theme=meu_tema, title="MIRAPLAY AI 2026") as app:
     gr.Markdown("# 🎙️ MIRAPLAY AI - Clonagem de Voz")
-    gr.Markdown("### Sistema otimizado para Português (Brasil) rodando em GPU T4.")
     
     with gr.Row():
         with gr.Column(scale=1):
             input_text = gr.Textbox(
                 label="Texto para a IA falar", 
-                placeholder="Ex: Olá, eu sou a sua nova voz clonada!",
+                placeholder="Digite o texto aqui...",
                 lines=5
             )
-            input_file = gr.File(label="Suba sua referência (MP3 ou WAV)")
+            # MUDANÇA AQUI: Voltamos para gr.Audio mas com 'filepath' e 'label'
+            # Isso habilita a seleção de arquivos de áudio no celular e PC
+            input_file = gr.Audio(
+                label="Selecione ou Grave seu Áudio (MP3 ou WAV)",
+                type="filepath",
+                sources=["upload", "microphone"]
+            )
             btn_gerar = gr.Button("🚀 GERAR CLONAGEM", variant="primary")
             
         with gr.Column(scale=1):
@@ -75,12 +68,5 @@ with gr.Blocks(theme=meu_tema, title="MIRAPLAY AI 2026") as app:
         outputs=output_audio
     )
 
-# --- INICIALIZAÇÃO CORRIGIDA ---
 if __name__ == "__main__":
-    # Removido o 'theme' daqui para acabar com o TypeError
-    app.launch(
-        share=True, 
-        debug=True, 
-        inline=False,
-        show_error=True
-    )
+    app.launch(share=True, debug=True)
