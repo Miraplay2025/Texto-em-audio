@@ -2,6 +2,7 @@ import os
 import torch
 from TTS.api import TTS
 import gradio as gr
+import shutil
 
 # Aceita os termos automaticamente
 os.environ["COQUI_TOS_AGREED"] = "1"
@@ -16,71 +17,46 @@ def clonar_voz_definitivo(texto, arquivo_referencia):
         if arquivo_referencia is None:
             return None
         
-        caminho_audio = arquivo_referencia.name 
+        # SOLUÇÃO DEFINITIVA: 
+        # Criamos uma cópia do arquivo com extensão .wav para garantir que a IA reconheça,
+        # não importa o que o Gradio pense que o arquivo seja.
+        caminho_original = arquivo_referencia.name
+        caminho_temporario = "temp_audio_ref.wav"
+        shutil.copy(caminho_original, caminho_temporario)
+        
         output = "resultado_miraplay.wav"
         
         tts.tts_to_file(
             text=texto,
-            speaker_wav=caminho_audio,
+            speaker_wav=caminho_temporario,
             language="pt",
             file_path=output
         )
         return output
     except Exception as e:
-        print(f"Erro: {e}")
+        print(f"Erro detectado: {e}")
         return None
 
-# --- CONFIGURAÇÃO DE DESIGN (THEME) ---
-meu_tema = gr.themes.Soft(
-    primary_hue="blue",
-    secondary_hue="slate",
-    neutral_hue="slate",
-    font=[gr.themes.GoogleFont("Poppins"), "ui-sans-serif", "system-ui", "sans-serif"],
-).set(
+# --- DESIGN MODERNO ---
+meu_tema = gr.themes.Soft(primary_hue="blue").set(
     body_background_fill="*neutral_950",
     block_background_fill="*neutral_900",
-    block_border_width="1px",
-    button_primary_background_fill="*primary_600",
-    button_primary_background_fill_hover="*primary_500",
 )
 
-# --- INTERFACE CUSTOMIZADA ---
 with gr.Blocks(theme=meu_tema, title="MIRAPLAY AI 2026") as app:
-    gr.Markdown(
-        """
-        # 🎙️ MIRAPLAY AI - Clonagem de Voz
-        ### Transforme texto em áudio com sua própria voz em segundos.
-        ---
-        """
-    )
+    gr.Markdown("# 🎙️ MIRAPLAY AI - Clonagem de Voz")
     
     with gr.Row():
-        with gr.Column(scale=1):
-            input_text = gr.Textbox(
-                label="Conteúdo da fala", 
-                placeholder="Digite aqui o texto que a IA deve dizer...",
-                lines=5
-            )
-            input_file = gr.File(
-                label="Sua Voz de Referência",
-                file_types=["audio"]
-            )
-            btn_gerar = gr.Button("🚀 GERAR CLONAGEM", variant="primary")
-            
-        with gr.Column(scale=1):
-            gr.Markdown("### 🔊 Resultado")
-            output_audio = gr.Audio(label="Áudio Gerado", interactive=False)
-            gr.Markdown(
-                """
-                > **Dica de Ouro:** Para melhores resultados, use um áudio de referência limpo, sem música de fundo e com cerca de 10 segundos de fala.
-                """
-            )
+        with gr.Column():
+            input_text = gr.Textbox(label="Texto para a IA falar", lines=4)
+            # USANDO O COMPONENTE DE ARQUIVO SEM FILTROS (Solução para o erro de 'Invalid Type')
+            input_file = gr.File(label="Suba seu áudio aqui (Qualquer formato)")
+            btn = gr.Button("🚀 GERAR VOZ", variant="primary")
+        
+        with gr.Column():
+            output_audio = gr.Audio(label="Resultado em Áudio")
 
-    btn_gerar.click(
-        fn=clonar_voz_definitivo,
-        inputs=[input_text, input_file],
-        outputs=output_audio
-    )
+    btn.click(fn=clonar_voz_definitivo, inputs=[input_text, input_file], outputs=output_audio)
 
 if __name__ == "__main__":
     app.launch(share=True, debug=True)
