@@ -22,14 +22,12 @@ def clonar_voz_definitivo(texto, arquivo_referencia):
         if arquivo_referencia is None:
             return None
         
-        # Resolve o problema de reconhecimento de áudio no Colab
         caminho_original = arquivo_referencia.name
         caminho_temporario = "temp_audio_ref.wav"
         shutil.copy(caminho_original, caminho_temporario)
         
         output = "resultado_miraplay.wav"
         
-        # Executa a síntese em Português
         tts.tts_to_file(
             text=texto,
             speaker_wav=caminho_temporario,
@@ -41,7 +39,7 @@ def clonar_voz_definitivo(texto, arquivo_referencia):
         print(f"💥 Erro na geração: {e}")
         return None
 
-# --- DESIGN MODERNO (THEME) ---
+# --- DESIGN MODERNO ---
 meu_tema = gr.themes.Soft(
     primary_hue="blue",
     neutral_hue="slate",
@@ -52,15 +50,10 @@ meu_tema = gr.themes.Soft(
     button_primary_background_fill="*primary_600",
 )
 
-# --- CONSTRUÇÃO DA INTERFACE ---
-with gr.Blocks(title="MIRAPLAY AI 2026") as app:
-    gr.Markdown(
-        """
-        # 🎙️ MIRAPLAY AI - Clonagem de Voz
-        ### Sistema otimizado para Português (Brasil) rodando em GPU T4.
-        ---
-        """
-    )
+# --- CONSTRUÇÃO DA INTERFACE (Tema de volta aqui para evitar o TypeError) ---
+with gr.Blocks(theme=meu_tema, title="MIRAPLAY AI 2026") as app:
+    gr.Markdown("# 🎙️ MIRAPLAY AI - Clonagem de Voz")
+    gr.Markdown("### Sistema otimizado para Português (Brasil) rodando em GPU T4.")
     
     with gr.Row():
         with gr.Column(scale=1):
@@ -69,21 +62,12 @@ with gr.Blocks(title="MIRAPLAY AI 2026") as app:
                 placeholder="Ex: Olá, eu sou a sua nova voz clonada!",
                 lines=5
             )
-            # gr.File evita o erro de "Invalid File Type" do navegador
-            input_file = gr.File(
-                label="Suba sua referência de voz (MP3 ou WAV)",
-            )
+            input_file = gr.File(label="Suba sua referência (MP3 ou WAV)")
             btn_gerar = gr.Button("🚀 GERAR CLONAGEM", variant="primary")
             
         with gr.Column(scale=1):
             gr.Markdown("### 🔊 Resultado")
             output_audio = gr.Audio(label="Áudio Gerado", interactive=False)
-            gr.Markdown(
-                """
-                > **Atenção:** Se o link cair, reinicie a célula no Google Colab. 
-                > O modelo leva cerca de 30 segundos para processar o áudio após clicar no botão.
-                """
-            )
 
     btn_gerar.click(
         fn=clonar_voz_definitivo,
@@ -91,12 +75,12 @@ with gr.Blocks(title="MIRAPLAY AI 2026") as app:
         outputs=output_audio
     )
 
-# --- INICIALIZAÇÃO ---
+# --- INICIALIZAÇÃO CORRIGIDA ---
 if __name__ == "__main__":
-    # Ajustado para evitar quedas e bugs de tema
+    # Removido o 'theme' daqui para acabar com o TypeError
     app.launch(
         share=True, 
         debug=True, 
         inline=False,
-        theme=meu_tema # Tema movido para o launch para evitar Warning
+        show_error=True
     )
